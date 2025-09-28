@@ -16,12 +16,14 @@ set(PACKAGE ApexOffline)
 # List only the implementation files (*.cxx). For every implementation file
 # there must be a corresponding header file (*.h).
 set(src
+  ApexVDCPlane.cxx
   )
 
 # Headers.
 set(headers 
   ApexVDCWire.h
   ApexVDCHit.h 
+  ApexVDCPlane.h
 )
 
 #------------------------------------------------------------------------------

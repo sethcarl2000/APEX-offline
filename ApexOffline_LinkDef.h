@@ -6,5 +6,6 @@
 
 #pragma link C++ class ApexVDCWire+; 
 #pragma link C++ struct ApexVDCHit+; 
+#pragma link C++ class ApexVDCPlane+; 
 
 #endif
