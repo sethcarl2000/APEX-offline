@@ -12,6 +12,7 @@
 #include <THaSubDetector.h> 
 #include <THaDetectorBase.h>
 #include <TDatime.h>  
+#include <TVector3.h> 
 #include "ApexVDCHit.h"
 #include "ApexVDCPlane.h"
 
@@ -30,7 +31,10 @@ private:
     double fTDC_rawtime_min = 0.; 
 
     //information about the geometry of the detector
+    TVector3 fCenter;       //center of the detector, displaced from the origin of the DET coordinate system [m]. 
+    double fLength, fWidth; //length (x-dir) and width (y-dir) of the detector [m]
     int fNumWires = 368; 
+    //position of the first wire from the center of the detector [m], along with wire spacing [m]. 
     double fFirstWirePos, fWireSpacing, fWireAngle; 
 
     int fGroup_span_min = 2;      //for hit 'groups', the min and max span
@@ -53,6 +57,9 @@ public:
     
     //read database, given the input date 
     int ReadDataBase(const TDatime& date);
+
+    //read geometry from the database
+    int ReadGeometry(FILE* file, const TDatime& date); 
 
     //wires
     int GetNWires() const { return fWires.size(); }

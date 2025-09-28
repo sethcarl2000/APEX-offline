@@ -67,7 +67,7 @@ int ApexVDCPlane::ReadDataBase(const TDatime& date)
         { "tdc.min",        &fTDC_rawtime_min, kInt,     0, true,  -1 },
         { "tdc.max",        &fTDC_rawtime_max, kInt,     0, true,  -1 },
         { "tdc.res",        &fTDC_resolution,  kDouble,  0, false, -1 },
-        { "tdc.offsets",    &tdc_offsets,      kFloatV,  0, false, -1 },
+        { "tdc.offsets",    &tdc_offsets,      kDoubleV, 0, false, -1 },
         { "group.minhits",  &fGroup_hits_min,  kInt,     0, true,  -1 },
         { "group.minspan",  &fGroup_span_min,  kInt,     0, true,  -1 },
         { "group.maxspan",  &fGroup_span_max,  kInt,     0, true,  -1 },
@@ -76,12 +76,21 @@ int ApexVDCPlane::ReadDataBase(const TDatime& date)
         { nullptr }
     };
 
+    //try to read the DB variables from our request above. 
     if((err = LoadDB(file, date, request, fPrefix)) != 0) {
         fclose(file);
         return err;
     }
-  
-    if( FillDetMap(detmap, THaDetMap::kFillLogicalChannel, here) <= 0 ) return kInitError; // Error already printed by FillDetMap
+
+    //try to read the geometry from the DB file
+    if ((err = ReadGeometry(file, date)) != 0) {
+        fclose(file); 
+        return err; 
+    }
+
+    //try to fill the detmap
+    if( FillDetMap(detmap, THaDetMap::kFillLogicalChannel, here) <= 0 ) 
+        return kInitError; // Error already printed by FillDetMap
 
     // All our frontend modules are common stop TDCs
     UInt_t nmodules = fDetMap->GetSize();
@@ -116,6 +125,36 @@ int ApexVDCPlane::ReadDataBase(const TDatime& date)
 }
 
 //______________________________________________________________________________________________________
+int ApexVDCPlane::ReadGeometry(FILE* file, const TDatime& date)
+{
+    //read geometry of the VDC from the DB file 
+    const char* const here = "ReadGeometry";
+
+    vector<double> position; 
+    DBRequest request[] = {
+        { "position", &position, kDoubleV, 0, false, 0, "detector center position in DET coord sys.[m])" },
+        { "length",   &fLength,  kDouble,  0, false, 0, "detector length (x-direction) [m])" },
+        { "width",    &fWidth,   kDouble,  0, false, 0, "detector width (y-direction) [m])"},
+        { nullptr }
+    };
+    int err;
+    if((err = LoadDB(file, date, request)) != 0) return kInitError;
+
+    if (position.size() != 3) {
+        ostringstream oss;
+        oss << "in <" << here << ">: number of DB entries under 'position' "
+               "("<< position.size()<<") is incorrect, must be 3 (x/y/z).";
+
+        throw logic_error(oss.str());
+        return kInitError; 
+    }
+
+    //set the center of the detector
+    fCenter.SetXYZ( position[0], position[1], position[2] );
+
+    return kOK; 
+}
+
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
