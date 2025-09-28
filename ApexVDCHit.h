@@ -1,0 +1,18 @@
+#ifndef ApexVDCHit_H
+#define ApexVDCHit_H
+////////////////////////////////////////////////////////////////////////////////////////
+//
+//  class: ApexVDCWire 
+//  A very basic container for APEX vdc hit information.  
+//
+//  - Seth H 28 Sep 25 
+////////////////////////////////////////////////////////////////////////////////////////
+
+#include "ApexVDCWire.h"
+
+struct ApexVDCHit {
+    const ApexVDCWire* fWire; 
+    double fRealTime, fRawTime;  
+};
+
+#endif 
