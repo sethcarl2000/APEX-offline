@@ -14,7 +14,8 @@
 #include <TDatime.h>  
 #include <TVector3.h> 
 #include "ApexVDCHit.h"
-#include "ApexVDCPlane.h"
+#include "ApexVDCWire.h"
+#include "ApexVDCHitGroup.h"
 
 class THaEvData; 
 
@@ -42,8 +43,9 @@ private:
     int fGroup_hits_min = 2;      //minimum number of hits for one group 
     int fGroup_max_gap  = 3;      //largest allowable 'gap' between hits in a group 
 
-    std::vector<ApexVDCWire> fWires; //list of all wires 
-    std::vector<ApexVDCHit>  fHits;  //list of all hits (for a single event)
+    std::vector<ApexVDCWire>        fWires; //list of all wires 
+    std::vector<ApexVDCHit>         fHits;  //list of all hits (for a single event)
+    std::vector<ApexVDCHitGroup>    fGroups; //list of all hit 'groups'  
 
 public: 
     explicit ApexVDCPlane(  const char* name="", 
@@ -52,22 +54,40 @@ public:
     
     ~ApexVDCPlane(); 
     
-    //decode raw TDC data into hit-data 
-    int Decode(const THaEvData& data) { return 0; }; //decode raw data
-    
     //read database, given the input date 
     int ReadDataBase(const TDatime& date);
 
     //read geometry from the database
     int ReadGeometry(FILE* file, const TDatime& date); 
 
+    //define variables which this detector can provide
+    int DefineVariables(EMode mode = kDefine); 
+
+    //these are a list of functions that will give us the variables we want. 
+    // see the implementation of 'DefineVariables' above to see how they are defined. 
+    std::vector<double> GetHits_rawtime()   const noexcept;
+    std::vector<double> GetHits_time()      const noexcept; 
+    std::vector<int>    GetHits_wire()      const noexcept;  
+    std::vector<double> GetHits_pos()       const noexcept;  
+    std::vector<int>    GetGroups_start()   const noexcept; 
+    std::vector<int>    GetGroups_end()     const noexcept; 
+    std::vector<int>    GetGroups_span()    const noexcept; 
+
+    //decode raw TDC data into hit-data 
+    int Decode(const THaEvData& data) { return 0; }; //decode raw data
+    
+
     //wires
     int GetNWires() const { return fWires.size(); }
-    std::vector<ApexVDCWire> GetWires() const { return fWires; }
+    std::vector<ApexVDCWire> GetWires() const noexcept { return fWires; }
     
     //hits 
     int GetNHits() const { return fHits.size(); }
-    std::vector<ApexVDCHit> GetHits() const { return fHits; }
+    std::vector<ApexVDCHit> GetHits() const noexcept { return fHits; }
+
+    //groups
+    int GetNGroups() const { return fGroups.size(); }
+    std::vector<ApexVDCHitGroup> GetGroups() const noexcept { return fGroups; }
 
     ClassDef(ApexVDCPlane,0); 
 }; 

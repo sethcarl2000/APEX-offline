@@ -11,8 +11,8 @@
 #include "ApexVDCWire.h"
 
 struct ApexVDCHit {
-    const ApexVDCWire* fWire; 
-    double fRealTime, fRawTime;  
+    const ApexVDCWire* wire; 
+    double realtime, rawtime;  
 };
 
 #endif 

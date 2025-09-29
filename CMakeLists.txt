@@ -24,6 +24,7 @@ set(headers
   ApexVDCWire.h
   ApexVDCHit.h 
   ApexVDCPlane.h
+  ApexVDCHitGroup.h
 )
 
 #------------------------------------------------------------------------------

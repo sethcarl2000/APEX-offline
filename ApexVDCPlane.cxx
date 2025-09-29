@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdexcept> 
 #include <sstream> 
+#include <utility> 
 
 using namespace std; 
 
@@ -155,6 +156,91 @@ int ApexVDCPlane::ReadGeometry(FILE* file, const TDatime& date)
     return kOK; 
 }
 
+//______________________________________________________________________________________________________
+int ApexVDCPlane::DefineVariables(EMode mode)
+{
+    // Here is the anatomy of an 'RVarDef' struct, taken from VarDef.h: 
+    // 
+    // struct RVarDef {
+    //    const char*      name;     // Variable name
+    //    const char*      desc;     // Variable description
+    //    const char*      def;      // Definition of data (data member or method name)
+    // };
+    //
+    RVarDef vars[] = {
+        {"nhits",           "Number of (raw) hits in this plane for this event",    "GetNHits()"},
+        {"hit.rawtime",     "Array of raw times for each hit",                      "GetHits_rawtime()"},
+        {"hit.time_gbl",    "offset-corrected 'real time' [s], but NOT relative to the event's selected S2 hit.", "GetHits_time()"},
+        {"hit.wire",        "VDC wire ID of this hit",                              "GetHits_wire()"},
+        {"hit.pos",         "position of this hit's wire [m]. given in UV-coords, rel. to central wire in plane.", "GetHits_pos()"},
+        {"ngroups",         "Number of hit-groups formed in this plane",            "GetNGroups()"},
+        {"group.nhits",     "Number of hits in this group",                         "GetGroups_nhits()"},
+        {"group.start",     "Hit index of first hit in group",                      "GetGroups_start()"},
+        {"group.end",       "Hit index of last hit in group",                       "GetGroups_end()"},
+        {"group.span",      "number of wires between first and last hit + 1 (see above def.)",  "GetGroups_span()"},
+        {nullptr}
+    }; 
+
+    return DefineVarsFromList(vars, mode); 
+}
+
+//______________________________________________________________________________________________________
+vector<double> ApexVDCPlane::GetHits_rawtime() const noexcept
+{
+    vector<double> ret; ret.reserve(fHits.size()); 
+    for (const auto& hit : fHits) ret.emplace_back(hit.rawtime);
+    return ret;  
+}
+//______________________________________________________________________________________________________
+vector<double> ApexVDCPlane::GetHits_time() const noexcept
+{
+    vector<double> ret; ret.reserve(fHits.size()); 
+    for (const auto& hit : fHits) ret.emplace_back(hit.realtime);
+    return ret;  
+}
+//______________________________________________________________________________________________________
+vector<int> ApexVDCPlane::GetHits_wire() const noexcept
+{
+    vector<int> ret; ret.reserve(fHits.size()); 
+    for (const auto& hit : fHits) ret.emplace_back(hit.wire->GetNum());
+    return ret;  
+}
+//______________________________________________________________________________________________________
+vector<double> ApexVDCPlane::GetHits_pos() const noexcept
+{
+    vector<double> ret; ret.reserve(fHits.size()); 
+    for (const auto& hit : fHits) ret.emplace_back(hit.wire->GetPos());
+    return ret;  
+}
+//______________________________________________________________________________________________________
+vector<int> ApexVDCPlane::GetGroups_start() const noexcept
+{
+    vector<int> ret; ret.reserve(fHits.size()); 
+    for (const auto& group : fGroups) ret.emplace_back(group.front().wire->GetNum());
+    return ret;  
+}
+//______________________________________________________________________________________________________
+vector<int> ApexVDCPlane::GetGroups_end() const noexcept
+{
+    vector<int> ret; ret.reserve(fHits.size()); 
+    for (const auto& group : fGroups) ret.emplace_back(group.back().wire->GetNum());
+    return ret;  
+}
+//______________________________________________________________________________________________________
+vector<int> ApexVDCPlane::GetGroups_span() const noexcept
+{
+    vector<int> ret; ret.reserve(fHits.size()); 
+    for (const auto& group : fGroups) ret.emplace_back(group.front().wire->GetNum() - group.back().wire->GetNum());
+    return ret;  
+}
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
+//______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
