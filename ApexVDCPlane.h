@@ -28,8 +28,8 @@ private:
     //      If you would like to change them without having to hard-code them here, see how they can 
     //      be manually speficied a DB file in the ApexVDCPlane::ReadDatabase() function. 
     //
-    double fTDC_resolution  = -0.5e-9;  //by default, half a nanosecond. 
-    double fTDC_rawtime_max = 2200.;  //maximum & minimum raw TDC times for each wire
+    double fTDC_resolution  = 0.5e-9;  //by default, half a nanosecond. 
+    double fTDC_rawtime_max = 2200.;   //maximum & minimum raw TDC times for each wire
     double fTDC_rawtime_min = 0.; 
 
     //information about the geometry of the detector

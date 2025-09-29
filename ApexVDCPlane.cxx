@@ -276,7 +276,7 @@ int ApexVDCPlane::StoreHit(const DigitizerHitInfo_t& hit_info, UInt_t data)
     const ApexVDCWire* wire = &fWires[wire_num]; 
 
     //now, compute the real-time
-    double realtime = (((double)rawtime) * fTDC_resolution)  +  wire->GetTimingOffset(); 
+    double realtime =  wire->GetTimingOffset() - (fTDC_resolution*((double)rawtime)); 
 
     //add this hit to the list of all hits
     fHits.push_back({wire, realtime, rawtime}); 
