@@ -13,6 +13,7 @@
 #include <THaDetectorBase.h>
 #include <TDatime.h>  
 #include <TVector3.h> 
+#include <THaDetMap.h> 
 #include "ApexVDCHit.h"
 #include "ApexVDCWire.h"
 #include "ApexVDCHitGroup.h"
@@ -73,7 +74,9 @@ public:
     std::vector<int>    GetGroups_end()     const noexcept; 
     std::vector<int>    GetGroups_span()    const noexcept; 
 
-    //decode raw TDC data into hit-data 
+    //decode raw TDC data into hit-data
+    int StoreHit(const DigitizerHitInfo_t& hit_info, UInt_t data); 
+
     int Decode(const THaEvData& data) { return 0; }; //decode raw data
     
 

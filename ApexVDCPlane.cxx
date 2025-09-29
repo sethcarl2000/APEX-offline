@@ -234,6 +234,54 @@ vector<int> ApexVDCPlane::GetGroups_span() const noexcept
     return ret;  
 }
 //______________________________________________________________________________________________________
+int ApexVDCPlane::StoreHit(const DigitizerHitInfo_t& hit_info, UInt_t data)
+{
+    //according to THaDetMap.h, 'DigitizerHitInfo_t', which is just an 
+    // alias for 'THaDetMap::Iterator::HitInfo_t', has the following public data members:
+    //
+    // ...  
+    //  Decoder::Module*     module; // Current frontend module being decoded
+    //  Decoder::ChannelType type;   // Measurement type for current channel (ADC/TDC)
+    //  Decoder::ChannelType modtype; // Module type (ADC/TDC/MultiFunctionADC etc.)
+    //  UInt_t  ev;      // Event number (for error messages)
+    //  UInt_t  crate;   // Hardware crate
+    //  UInt_t  slot;    // Hardware slot
+    //  UInt_t  chan;    // Physical channel in current module
+    //  UInt_t  nhit;    // Number of hits in current channel
+    //  UInt_t  hit;     // Hit number in current channel
+    //  Int_t   lchan;   // Logical channel according to detector map
+    // ... 
+    // 
+    const char* const here = "StoreHit"; 
+
+    int wire_num = hit_info.lchan; 
+    //check if this logical channel number is invalid or not
+    if (wire_num < 0 || (size_t)wire_num >= fWires.size()) {
+        ostringstream oss;
+        oss <<  "in <" << here << ">: wire number of hit is invalid (" << wire_num << ") must be"
+                " in the range [0," << fWires.size()-1 << "]."; 
+        throw logic_error(oss.str()); 
+        return -1;  
+    }
+
+    //convert the data to a double 
+    double rawtime = static_cast<double>(data); 
+
+    //check to see if this hit is outside of our TDC cutoff range 
+    if (rawtime > fTDC_rawtime_max || rawtime < fTDC_rawtime_min) return 0; 
+
+    //grab our wire so we can get some info from it 
+    const ApexVDCWire* wire = &fWires[wire_num]; 
+
+    //now, compute the real-time
+    double realtime = (((double)rawtime) * fTDC_resolution)  +  wire->GetTimingOffset(); 
+
+    //add this hit to the list of all hits
+    fHits.push_back({wire, realtime, rawtime}); 
+
+    return 0; 
+}
+
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
