@@ -5,6 +5,8 @@
 #include <stdexcept> 
 #include <sstream> 
 #include <utility> 
+#include <algorithm> 
+#include <optional> 
 
 using namespace std; 
 
@@ -283,6 +285,48 @@ int ApexVDCPlane::StoreHit(const DigitizerHitInfo_t& hit_info, UInt_t data)
 }
 
 //______________________________________________________________________________________________________
+int ApexVDCPlane::Decode(const THaEvData& event_data)
+{
+    //check to see if this is a physics event
+    if (!event_data.IsPhysicsTrigger()) return -1; 
+    
+    const char* const here = "Decode"; 
+
+    //iterate thru all hits
+    auto it = fDetMap->MakeMultiHitIterator(event_data); 
+
+    bool has_warning = false; 
+
+    while (it) {
+
+        const auto& hit_info = *it; 
+
+        std::optional<UInt_t> data = LoadData(event_data, hit_info); 
+
+        //check to see if there's valid data to be found for this hit
+        if (data) {
+            
+            //store the hit if so 
+            StoreHit(hit_info, data.value())    ; 
+
+        } else {
+
+            //if the data is missing, show a warning 
+            DataLoadWarning(hit_info, here); 
+            has_warning = true; 
+        }   
+        //iterate to next hit
+        ++it; 
+    }
+
+    if (has_warning) fNEventsWithWarnings++; 
+    
+    //now, sort all hits in ascending order of wire number, and in ascending order of realtime for
+    // hits on the same wire. 
+    std::sort( fHits.begin(), fHits.end() ); 
+
+    return fHits.size(); 
+}
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________
 //______________________________________________________________________________________________________

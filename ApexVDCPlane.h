@@ -28,7 +28,7 @@ private:
     //      If you would like to change them without having to hard-code them here, see how they can 
     //      be manually speficied a DB file in the ApexVDCPlane::ReadDatabase() function. 
     //
-    double fTDC_resolution  = 0.5e-9;  //by default, half a nanosecond. 
+    double fTDC_resolution  = -0.5e-9;  //by default, half a nanosecond. 
     double fTDC_rawtime_max = 2200.;  //maximum & minimum raw TDC times for each wire
     double fTDC_rawtime_min = 0.; 
 
@@ -76,10 +76,10 @@ public:
 
     //decode raw TDC data into hit-data
     int StoreHit(const DigitizerHitInfo_t& hit_info, UInt_t data); 
-
-    int Decode(const THaEvData& data) { return 0; }; //decode raw data
     
-
+    //decode raw TDC data 
+    int Decode(const THaEvData& data); 
+    
     //wires
     int GetNWires() const { return fWires.size(); }
     std::vector<ApexVDCWire> GetWires() const noexcept { return fWires; }
